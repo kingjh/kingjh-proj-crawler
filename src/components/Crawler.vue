@@ -32,10 +32,9 @@
             <v-chip
               v-for="keyword in beiAnKeywords"
               :key="keyword.id"
-              filter
-              outlined
-              :color="keyword.requireMW ? 'primary' : 'default'"
-              @click="toggleKeyword(keyword)"
+              :color="keyword.isSelected ? '' : 'grey'"
+              variant="flat"
+              @click="toggleBeiAnKeyword(keyword)"
             >
               {{ keyword.keyword }}{{ keyword.requireMW ? '+MW' : '' }}
             </v-chip>
@@ -80,12 +79,11 @@
           <v-chip-group column multiple>
             <v-chip
               v-for="keyword in heZhunKeywords"
-              :key="keyword"
-              filter
-              outlined
+              :key="keyword.id"
+              :color="keyword.isSelected ? '' : 'grey'"
               @click="toggleHeZhunKeyword(keyword)"
             >
-              {{ keyword }}
+              {{ keyword.keyword }}
             </v-chip>
           </v-chip-group>
           <v-row>
@@ -129,12 +127,18 @@ const isHeZhunCrawling = ref(false)
 const timer = ref(null)
 const elapsedTime = ref(0)
 const beiAnKeywords = ref([
-  { id: 1, keyword: '独立储能', requireMW: false },
-  // { id: 2, keyword: '储能', requireMW: true },
-  // { id: 3, keyword: '农光互补', requireMW: true },
-  // { id: 4, keyword: '渔光互补', requireMW: true }
+  { id: 1, keyword: '独立储能', requireMW: false, isSelected: true },
+  { id: 2, keyword: '储能', requireMW: true, isSelected: true },
+  { id: 3, keyword: '农光互补', requireMW: true, isSelected: true },
+  { id: 4, keyword: '渔光互补', requireMW: true, isSelected: true }
 ])
-const heZhunKeywords = ref(['光伏', '风电场', '牵引站', '用户站', '专用站'])
+const heZhunKeywords = ref([
+  { id: 1, keyword: '光伏', isSelected: true },
+  { id: 2, keyword: '风电场', isSelected: true },
+  { id: 3, keyword: '牵引站', isSelected: true },
+  { id: 4, keyword: '用户站', isSelected: true },
+  { id: 5, keyword: '专用站', isSelected: true }
+])
 const newBeiAnKeyword = ref('')
 const newHeZhunKeyword = ref('')
 const newKeywordRequireMW = ref(false)
@@ -162,19 +166,18 @@ const showHeZhunDialog = () => {
 const addBeiAnKeyword = () => {
   if (newBeiAnKeyword.value && !beiAnKeywords.value.some(k => k.keyword === newBeiAnKeyword.value)) {
     beiAnKeywords.value.push({
-      id: Date.now(), // 使用时间戳作为唯一ID
+      id: Date.now(),
       keyword: newBeiAnKeyword.value,
-      requireMW: newKeywordRequireMW.value
+      requireMW: newKeywordRequireMW.value,
+      isSelected: true
     })
     newBeiAnKeyword.value = ''
     newKeywordRequireMW.value = false
   }
 }
 
-const toggleKeyword = (keyword) => {
-  if (keyword.keyword !== '独立储能') { // 独立储能不允许切换MW要求
-    keyword.requireMW = !keyword.requireMW
-  }
+const toggleBeiAnKeyword = (keyword) => {
+  keyword.isSelected = !keyword.isSelected
 }
 
 const startTimer = () => {
@@ -203,13 +206,18 @@ const downloadExcel = (data, filename) => {
 }
 
 const startBeiAnCrawler = async () => {
+  const selectedKeywords = beiAnKeywords.value.filter(k => k.isSelected)
+  if (selectedKeywords.length === 0) {
+    alert('请至少选择一个关键词')
+    return
+  }
+
   beiAnDialog.value = false
   isBeiAnCrawling.value = true
   startTimer()
 
   try {
-    console.log(beiAnKeywords.value)
-    const result = await crawlBeiAn(beiAnKeywords.value)
+    const result = await crawlBeiAn(selectedKeywords)
     downloadExcel(result, '备案信息.xlsx')
   } catch (error) {
     console.error('备案信息爬取失败:', error)
@@ -220,12 +228,18 @@ const startBeiAnCrawler = async () => {
 }
 
 const startHeZhunCrawler = async () => {
+  const selectedKeywords = heZhunKeywords.value.filter(k => k.isSelected)
+  if (selectedKeywords.length === 0) {
+    alert('请至少选择一个关键词')
+    return
+  }
+
   heZhunDialog.value = false
   isHeZhunCrawling.value = true
   startTimer()
 
   try {
-    const result = await crawlHeZhun(heZhunKeywords.value)
+    const result = await crawlHeZhun(selectedKeywords.map(k => k.keyword))
     downloadExcel(result, '核准信息.xlsx')
   } catch (error) {
     console.error('核准信息爬取失败:', error)
@@ -236,18 +250,17 @@ const startHeZhunCrawler = async () => {
 }
 
 const addHeZhunKeyword = () => {
-  if (newHeZhunKeyword.value && !heZhunKeywords.value.includes(newHeZhunKeyword.value)) {
-    heZhunKeywords.value.push(newHeZhunKeyword.value)
+  if (newHeZhunKeyword.value && !heZhunKeywords.value.some(k => k.keyword === newHeZhunKeyword.value)) {
+    heZhunKeywords.value.push({
+      id: Date.now(),
+      keyword: newHeZhunKeyword.value,
+      isSelected: true
+    })
     newHeZhunKeyword.value = ''
   }
 }
 
 const toggleHeZhunKeyword = (keyword) => {
-  const index = heZhunKeywords.value.indexOf(keyword)
-  if (index > -1) {
-    heZhunKeywords.value.splice(index, 1)
-  } else {
-    heZhunKeywords.value.push(keyword)
-  }
+  keyword.isSelected = !keyword.isSelected
 }
 </script> 
