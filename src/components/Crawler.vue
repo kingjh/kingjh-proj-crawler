@@ -127,17 +127,17 @@ const isHeZhunCrawling = ref(false)
 const timer = ref(null)
 const elapsedTime = ref(0)
 const beiAnKeywords = ref([
-  { id: 1, keyword: '独立储能', requireMW: false, isSelected: true },
-  { id: 2, keyword: '储能', requireMW: true, isSelected: true },
-  { id: 3, keyword: '农光互补', requireMW: true, isSelected: true },
-  { id: 4, keyword: '渔光互补', requireMW: true, isSelected: true }
+  { id: 1, keyword: '独立储能', requireMW: false, isSelected: false },
+  { id: 2, keyword: '储能', requireMW: true, isSelected: false },
+  { id: 3, keyword: '农光互补', requireMW: true, isSelected: false },
+  { id: 4, keyword: '渔光互补', requireMW: true, isSelected: false }
 ])
 const heZhunKeywords = ref([
-  { id: 1, keyword: '光伏', isSelected: true },
-  { id: 2, keyword: '风电场', isSelected: true },
-  { id: 3, keyword: '牵引站', isSelected: true },
-  { id: 4, keyword: '用户站', isSelected: true },
-  { id: 5, keyword: '专用站', isSelected: true }
+  { id: 1, keyword: '光伏', isSelected: false },
+  { id: 2, keyword: '风电场', isSelected: false },
+  { id: 3, keyword: '牵引站', isSelected: false },
+  { id: 4, keyword: '用户站', isSelected: false },
+  { id: 5, keyword: '专用站', isSelected: false }
 ])
 const newBeiAnKeyword = ref('')
 const newHeZhunKeyword = ref('')
