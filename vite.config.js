@@ -3,6 +3,8 @@ import vue from '@vitejs/plugin-vue'
 import * as path from 'path';
 
 export default defineConfig({
+  // 设置基础路径为 /项目名/
+  base: '/kingjh-proj-crawler/',
   plugins: [vue()],
   server: {
     port: 3000
