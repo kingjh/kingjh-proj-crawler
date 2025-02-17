@@ -5,7 +5,6 @@
         <v-btn
           block
           color="primary"
-          :loading="isBeiAnCrawling"
           :disabled="isCrawling"
           @click="showBeiAnDialog"
         >
@@ -16,7 +15,6 @@
         <v-btn
           block
           color="secondary"
-          :loading="isHeZhunCrawling"
           :disabled="isCrawling"
           @click="showHeZhunDialog"
         >
@@ -79,23 +77,33 @@
       <v-card>
         <v-card-title>设置核准信息关键词</v-card-title>
         <v-card-text>
-          <v-chip-group v-model="heZhunKeywords" column multiple>
+          <v-chip-group column multiple>
             <v-chip
               v-for="keyword in heZhunKeywords"
               :key="keyword"
               filter
               outlined
+              @click="toggleHeZhunKeyword(keyword)"
             >
               {{ keyword }}
             </v-chip>
           </v-chip-group>
-          <v-text-field
-            v-model="newHeZhunKeyword"
-            label="添加新关键词"
-            append-icon="mdi-plus"
-            @click:append="addHeZhunKeyword"
-            @keyup.enter="addHeZhunKeyword"
-          ></v-text-field>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                v-model="newHeZhunKeyword"
+                label="添加新关键词"
+                @keyup.enter="addHeZhunKeyword"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-btn
+            color="primary"
+            @click="addHeZhunKeyword"
+            :disabled="!newHeZhunKeyword"
+          >
+            添加关键词
+          </v-btn>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -224,6 +232,22 @@ const startHeZhunCrawler = async () => {
   } finally {
     isHeZhunCrawling.value = false
     stopTimer()
+  }
+}
+
+const addHeZhunKeyword = () => {
+  if (newHeZhunKeyword.value && !heZhunKeywords.value.includes(newHeZhunKeyword.value)) {
+    heZhunKeywords.value.push(newHeZhunKeyword.value)
+    newHeZhunKeyword.value = ''
+  }
+}
+
+const toggleHeZhunKeyword = (keyword) => {
+  const index = heZhunKeywords.value.indexOf(keyword)
+  if (index > -1) {
+    heZhunKeywords.value.splice(index, 1)
+  } else {
+    heZhunKeywords.value.push(keyword)
   }
 }
 </script> 

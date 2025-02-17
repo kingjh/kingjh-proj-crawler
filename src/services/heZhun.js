@@ -37,7 +37,7 @@ function sleep(ms) {
 }
 
 async function getTotalPages(keyWord, cityCode) {
-    const response = await fetch(`${baseUrl}/selectByPageHZ`, {
+    const response = await fetch(`${baseUrl}/selectHzByPage`, {
         method: 'POST',
         headers: headers,
         body: '{"flag":"10","nameOrCode":"' + keyWord + '","pageSize":15,"city":"' + cityCode + '","pageNumber":1}',
@@ -47,7 +47,7 @@ async function getTotalPages(keyWord, cityCode) {
 }
 
 async function getProjects(keyWord, cityCode, page) {
-    const response = await fetch(`${baseUrl}/selectByPageHZ`, {
+    const response = await fetch(`${baseUrl}/selectHzByPage`, {
         method: 'POST',
         headers: headers,
         body: '{"flag":"10","nameOrCode":"' + keyWord + '","pageSize":15,"city":"' + cityCode + '","pageNumber":' + page + '}',
@@ -56,11 +56,11 @@ async function getProjects(keyWord, cityCode, page) {
     return data.data.list;
 }
 
-async function getProjectDetails(hzId) {
-    const response = await fetch(`${baseUrl}/selectHzProjectInfo`, {
+async function getProjectDetails(id) {
+    const response = await fetch(`${baseUrl}/getHzggInfoById`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ hzId })
+        body: JSON.stringify({ id: id })
     });
     const data = await response.json();
     return {
@@ -84,7 +84,7 @@ export async function crawlHeZhun(keywords) {
                 await sleep(10000)
 
                 for (const project of projects) {
-                    const details = await getProjectDetails(project.hzId)
+                    const details = await getProjectDetails(project.id)
                     await sleep(10000)
                     results.push({
                         城市: city,
