@@ -41,7 +41,7 @@ async function getTotalPages(keyWord, cityCode) {
     const response = await fetch(`${baseUrl}/selectByPageBA`, {
         method: 'POST',
         headers: headers,
-        body: '{"flag":"1","nameOrCode":"' + keyWord + '","pageSize":15,"city":"' + cityCode + '","pageNumber":1}',
+        body: '{"flag":"1","nameOrCode":"' + keyWord.keyword + '","pageSize":15,"city":"' + cityCode + '","pageNumber":1}',
     });
     const data = await response.json();
     return data.data.totalPage;
@@ -51,19 +51,23 @@ async function getProjects(keyWord, cityCode, page) {
     const response = await fetch(`${baseUrl}/selectByPageBA`, {
         method: 'POST',
         headers: headers,
-        body: '{"flag":"1","nameOrCode":"' + keyWord + '","pageSize":15,"city":"' + cityCode + '","pageNumber":' + page + '}',
+        body: '{"flag":"1","nameOrCode":"' + keyWord.keyword + '","pageSize":15,"city":"' + cityCode + '","pageNumber":' + page + '}',
     });
     const data = await response.json();
-    const isStore = keyWord === '储能'
 
     return data.data.list.filter(item => {
-        console.log(item.projectName, isStore)
-        if (!isStore) {
-            const match = item.projectName.match(/(\d+(\.\d+)?)MW/); // 匹配整数或小数
-            return match && parseFloat(match[1]) > 10; // 转换为浮点数并筛选
+        // 先检查项目名称是否包含关键词
+        if (!item.projectName.includes(keyWord.keyword)) {
+            return false;
         }
 
-        return item.projectName.includes('独立储能')
+        // 如果需要MW筛选
+        if (keyWord.requireMW) {
+            const match = item.projectName.match(/(\d+(\.\d+)?)MW/); // 匹配整数或小数
+            return match && parseFloat(match[1]) >= 10; // 转换为浮点数并筛选
+        }
+
+        return true; // 不需要MW筛选时，只要包含关键词就返回
     });
 }
 

@@ -30,23 +30,40 @@
       <v-card>
         <v-card-title>设置备案信息关键词</v-card-title>
         <v-card-text>
-          <v-chip-group v-model="beiAnKeywords" column multiple>
+          <v-chip-group column multiple>
             <v-chip
               v-for="keyword in beiAnKeywords"
-              :key="keyword"
+              :key="keyword.id"
               filter
               outlined
+              :color="keyword.requireMW ? 'primary' : 'default'"
+              @click="toggleKeyword(keyword)"
             >
-              {{ keyword }}
+              {{ keyword.keyword }}{{ keyword.requireMW ? '+MW' : '' }}
             </v-chip>
           </v-chip-group>
-          <v-text-field
-            v-model="newBeiAnKeyword"
-            label="添加新关键词"
-            append-icon="mdi-plus"
-            @click:append="addBeiAnKeyword"
-            @keyup.enter="addBeiAnKeyword"
-          ></v-text-field>
+          <v-row>
+            <v-col cols="8">
+              <v-text-field
+                v-model="newBeiAnKeyword"
+                label="添加新关键词"
+                @keyup.enter="addBeiAnKeyword"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="4">
+              <v-checkbox
+                v-model="newKeywordRequireMW"
+                label="需要MW"
+              ></v-checkbox>
+            </v-col>
+          </v-row>
+          <v-btn
+            color="primary"
+            @click="addBeiAnKeyword"
+            :disabled="!newBeiAnKeyword"
+          >
+            添加关键词
+          </v-btn>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -103,10 +120,16 @@ const isBeiAnCrawling = ref(false)
 const isHeZhunCrawling = ref(false)
 const timer = ref(null)
 const elapsedTime = ref(0)
-const beiAnKeywords = ref(['储能', '农光互补', '渔光互补'])
+const beiAnKeywords = ref([
+  { id: 1, keyword: '独立储能', requireMW: false },
+  // { id: 2, keyword: '储能', requireMW: true },
+  // { id: 3, keyword: '农光互补', requireMW: true },
+  // { id: 4, keyword: '渔光互补', requireMW: true }
+])
 const heZhunKeywords = ref(['光伏', '风电场', '牵引站', '用户站', '专用站'])
 const newBeiAnKeyword = ref('')
 const newHeZhunKeyword = ref('')
+const newKeywordRequireMW = ref(false)
 
 // 计算属性
 const isCrawling = computed(() => isBeiAnCrawling.value || isHeZhunCrawling.value)
@@ -129,16 +152,20 @@ const showHeZhunDialog = () => {
 }
 
 const addBeiAnKeyword = () => {
-  if (newBeiAnKeyword.value && !beiAnKeywords.value.includes(newBeiAnKeyword.value)) {
-    beiAnKeywords.value.push(newBeiAnKeyword.value)
+  if (newBeiAnKeyword.value && !beiAnKeywords.value.some(k => k.keyword === newBeiAnKeyword.value)) {
+    beiAnKeywords.value.push({
+      id: Date.now(), // 使用时间戳作为唯一ID
+      keyword: newBeiAnKeyword.value,
+      requireMW: newKeywordRequireMW.value
+    })
     newBeiAnKeyword.value = ''
+    newKeywordRequireMW.value = false
   }
 }
 
-const addHeZhunKeyword = () => {
-  if (newHeZhunKeyword.value && !heZhunKeywords.value.includes(newHeZhunKeyword.value)) {
-    heZhunKeywords.value.push(newHeZhunKeyword.value)
-    newHeZhunKeyword.value = ''
+const toggleKeyword = (keyword) => {
+  if (keyword.keyword !== '独立储能') { // 独立储能不允许切换MW要求
+    keyword.requireMW = !keyword.requireMW
   }
 }
 
@@ -173,6 +200,7 @@ const startBeiAnCrawler = async () => {
   startTimer()
 
   try {
+    console.log(beiAnKeywords.value)
     const result = await crawlBeiAn(beiAnKeywords.value)
     downloadExcel(result, '备案信息.xlsx')
   } catch (error) {
