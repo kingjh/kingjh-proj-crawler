@@ -1,0 +1,10 @@
+project/
+  ├── src/
+  │   ├── components/
+  │   │   └── Crawler.vue
+  │   ├── services/
+  │   │   ├── beiAn.js
+  │   │   └── heZhun.js
+  │   ├── App.vue
+  │   └── main.js
+  └── package.json 
