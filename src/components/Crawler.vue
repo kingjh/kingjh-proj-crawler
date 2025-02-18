@@ -32,8 +32,7 @@
             <v-chip
               v-for="keyword in beiAnKeywords"
               :key="keyword.id"
-              :color="keyword.isSelected ? '' : 'grey'"
-              variant="flat"
+              color="green"
               @click="toggleBeiAnKeyword(keyword)"
             >
               {{ keyword.keyword }}{{ keyword.requireMW ? '+MW' : '' }}
@@ -77,10 +76,11 @@
         <v-card-title>设置核准信息关键词</v-card-title>
         <v-card-text>
           <v-chip-group column multiple>
+
             <v-chip
               v-for="keyword in heZhunKeywords"
               :key="keyword.id"
-              :color="keyword.isSelected ? '' : 'grey'"
+              color="green"
               @click="toggleHeZhunKeyword(keyword)"
             >
               {{ keyword.keyword }}
